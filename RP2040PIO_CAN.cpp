@@ -112,7 +112,8 @@ int RP2040PIO_CAN::write(CanMsg const &msg) {
   can2040_msg cd_msg;
   cd_msg.id = msg.isStandardId() ? msg.getStandardId()
                                  : (msg.getExtendedId() | CAN2040_ID_EFF);
-  cd_msg.dlc = std::min<uint32_t>(msg.data_length, 8);
+  cd_msg.dlc =
+      std::min<uint32_t>(msg.data_length, CanMsg::CanMsg::MAX_DATA_LENGTH);
   std::memcpy(cd_msg.data, msg.data, cd_msg.dlc);
   if (can2040_check_transmit(&cd_) == 0) {
     return 0;
