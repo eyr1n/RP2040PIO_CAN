@@ -116,10 +116,10 @@ int RP2040PIO_CAN::write(CanMsg const &msg) {
       std::min<uint32_t>(msg.data_length, CanMsg::CanMsg::MAX_DATA_LENGTH);
   std::memcpy(cd_msg.data, msg.data, cd_msg.dlc);
   if (can2040_check_transmit(&cd_) == 0) {
-    return 0;
+    return -1;
   }
   int res = can2040_transmit(&cd_, &cd_msg);
-  if (res != 0) {
+  if (res < 0) {
     return res;
   }
   return 1;
