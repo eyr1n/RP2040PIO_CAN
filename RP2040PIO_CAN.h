@@ -3,11 +3,13 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <Arduino.h>
-
 #include <pico/util/queue.h>
 
-#include "CanMsg.h"
+#include "HardwareCAN.h"
+
+using arduino::CanExtendedId;
+using arduino::CanMsg;
+using arduino::CanStandardId;
 
 extern "C" {
 #include "can2040.h"
@@ -25,31 +27,33 @@ void PIO2_IRQHandler();
 #endif
 }
 
-class RP2040PIO_CAN {
+class RP2040PIO_CAN : public arduino::HardwareCAN {
 public:
-  RP2040PIO_CAN(uint32_t pio, pin_size_t rx, pin_size_t tx);
+  RP2040PIO_CAN(uint32_t pio, pin_size_t rx_pin, pin_size_t tx_pin);
 
-  void setRX(pin_size_t pin);
+  void setRX(pin_size_t rx_pin);
 
-  void setTX(pin_size_t pin);
+  void setTX(pin_size_t tx_pin);
 
-  void begin(uint32_t bitrate, size_t queueSize = 32);
+  bool begin(CanBitRate const can_bitrate) override;
 
-  void end();
+  bool begin(CanBitRate const can_bitrate, size_t rx_queue_len);
 
-  int write(const CanMsg &msg);
+  void end() override;
 
-  size_t available();
+  int write(CanMsg const &msg) override;
 
-  CanMsg read();
+  size_t available() override;
+
+  CanMsg read() override;
 
 private:
-  uint32_t pio;
-  pin_size_t rx;
-  pin_size_t tx;
+  uint32_t pio_;
+  pin_size_t rx_pin_;
+  pin_size_t tx_pin_;
 
-  can2040 cd;
-  queue_t queue;
+  can2040 cd_;
+  queue_t rx_queue_;
 
   friend void CAN0_Handler(can2040 *cd, uint32_t notify, can2040_msg *msg);
   friend void CAN1_Handler(can2040 *cd, uint32_t notify, can2040_msg *msg);
