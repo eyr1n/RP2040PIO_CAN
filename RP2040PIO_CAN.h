@@ -5,7 +5,7 @@
 
 #include <pico/util/queue.h>
 
-#include "HardwareCAN.h"
+#include <api/HardwareCAN.h>
 
 using arduino::CanExtendedId;
 using arduino::CanMsg;
